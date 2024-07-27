@@ -1,0 +1,25 @@
+import json
+import pytest
+from selenium.webdriver.common.by import By
+
+# Load test data
+with open('data/login_data.json') as f:
+    login_data = json.load(f)
+
+@pytest.mark.parametrize("data", login_data)
+def test_login(browser, data):
+    browser.get('http://your-orangehrm-url.com')
+
+    username_input = browser.find_element(By.ID, 'txtUsername')
+    password_input = browser.find_element(By.ID, 'txtPassword')
+    login_button = browser.find_element(By.ID, 'btnLogin')
+
+    username_input.send_keys(data['username'])
+    password_input.send_keys(data['password'])
+    login_button.click()
+
+    if data['expected_result'] == 'success':
+        assert browser.current_url == 'http://your-orangehrm-url.com/dashboard', "Login failed"
+    else:
+        error_message = browser.find_element(By.ID, 'spanMessage').text
+        assert error_message == 'Invalid credentials', "Error message not displayed correctly"

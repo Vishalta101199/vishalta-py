@@ -1,0 +1,51 @@
+from selenium.webdriver.common.by import By
+from pages.base_page import BasePage
+
+class PIMPage(BasePage):
+    add_button = (By.ID, 'btnAdd')
+    save_button = (By.ID, 'btnSave')
+    first_name_field = (By.ID, 'firstName')
+    last_name_field = (By.ID, 'lastName')
+    employee_list = (By.ID, 'employeeListTable')
+    search_employee_field = (By.ID, 'empsearch_employee_name_empName')
+    search_button = (By.ID, 'searchBtn')
+    edit_button = (By.XPATH, "//a[contains(text(),'Edit')]")
+    delete_button = (By.ID, 'btnDelete')
+
+    def add_employee(self, first_name, last_name):
+        self.find_element(*self.add_button).click()
+        self.find_element(*self.first_name_field).send_keys(first_name)
+        self.find_element(*self.last_name_field).send_keys(last_name)
+        self.find_element(*self.save_button).click()
+
+    def edit_employee(self, first_name, last_name, new_first_name, new_last_name):
+        self.search_employee(first_name, last_name)
+        self.find_element(*self.edit_button).click()
+        self.find_element(*self.first_name_field).clear()
+        self.find_element(*self.first_name_field).send_keys(new_first_name)
+        self.find_element(*self.last_name_field).clear()
+        self.find_element(*self.last_name_field).send_keys(new_last_name)
+        self.find_element(*self.save_button).click()
+
+    def delete_employee(self, first_name, last_name):
+        self.search_employee(first_name, last_name)
+        self.find_element(*self.delete_button).click()
+        self.driver.switch_to.alert.accept()  # Confirm the deletion
+
+    def search_employee(self, first_name, last_name):
+        self.find_element(*self.search_employee_field).send_keys(f"{first_name} {last_name}")
+        self.find_element(*self.search_button).click()
+
+    def is_employee_added(self, first_name, last_name):
+        self.search_employee(first_name, last_name)
+        return len(self.find_elements(By.XPATH, f"//a[text()='{first_name} {last_name}']")) > 0
+
+    def is_employee_edited(self, new_first_name, new_last_name):
+        self.search_employee(new_first_name, new_last_name)
+        return len(self.find_elements(By.XPATH, f"//a[text()='{new_first_name} {new_last_name}']")) > 0
+
+    def is_employee_deleted(self, first_name, last_name):
+        self.search_employee(first_name, last_name)
+        return len(self.find_elements(By.XPATH, f"//a[text()='{first_name} {last_name}']")) == 0
+
+        
